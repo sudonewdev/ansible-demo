@@ -2,6 +2,16 @@
 - hosts: all
   become: true
   tasks:
+  - name: Update repo index
+    apt:
+      update_cache: yes
+
   - name: Install Apache
     apt:
       name: apache2
+      state: latest
+  
+  - name: Update php mod for apache2
+    apt:
+      name: libapache2-mod-php
+      state: latest
