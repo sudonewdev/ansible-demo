@@ -10,4 +10,4 @@
   - name: remove php apache2 mod
     apt:
       name: libapache2-mod-php
-      state: absent
+      state: absent3
