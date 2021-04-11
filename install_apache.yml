@@ -2,36 +2,23 @@
 - hosts: all
   become: true
   tasks:
-  - name: Update repo index
+  - name: Install Apache2 and php packages for Ubuntu
     apt:
+      name: 
+        - apache2
+        - libapache2-mod-php
+        - htop
+      state: latest
       update_cache: yes
     when: ansible_distribution == 'Ubuntu'
 
-  - name: Install Apache
-    apt:
-      name: apache2
-      state: latest
-    when: ansible_distribution == 'Ubuntu'
-  
-  - name: Update php mod for apache2
-    apt:
-      name: libapache2-mod-php
-      state: latest
-    when: ansible_distribution == 'Ubuntu'
-
-  - name: Update repo index Centos
+  - name: Install httpd & php for CentOS
     yum:
+      name: 
+        - epel-release
+        - httpd
+        - php
+        - htop
+      state: latest
       update_cache: yes
-    when: ansible_distribution == 'CentOS'
-
-  - name: Install httpd
-    yum:
-      name: httpd
-      state: latest
-    when: ansible_distribution == 'CentOS'
-  
-  - name: Update php mod for httpd
-    yum:
-      name: php
-      state: latest
     when: ansible_distribution == 'CentOS'
