@@ -3,20 +3,24 @@
   become: true
   pre_tasks:
     - name: install update (CentOS)
+      tags: always
       yum:
         update_only: yes
         update_cache: yes
       when: ansible_distribution == 'CentOS'  
     - name: install update (Ubuntu)
+      tags: always
       apt:
         upgrade: dist
         update_cache: yes
       when: ansible_distribution == 'Ubuntu'
 
 - hosts: web_servers
+  gather_facts: false
   become: true
   tasks:
     - name: Install Apache2 and php packages for Ubuntu
+      tags: apache, ubuntu
       apt:
         name: 
           - apache2
@@ -26,6 +30,7 @@
       when: ansible_distribution == 'Ubuntu'
 
     - name: Install httpd & php for CentOS
+      tags: httpd,centos
       yum:
         name: 
           - httpd
@@ -36,14 +41,17 @@
 
 - hosts: db_servers
   become: true
+  gather_facts: false
   tasks:
     - name: Mariadb install (CentOS)
+      tags: db,centos
       yum:
         name:
           - maridb
         state: latest
       when: ansible_distribution == 'CentOS'
     - name: MariaDB install (Ubuntu)
+      tags: db, ubuntu
       apt:
         name: 
           - mariadb-server
@@ -51,9 +59,11 @@
       when: ansible_distribution == 'Ubuntu'
 
 - hosts: file_servers
+  gather_facts: false
   become: yes
   tasks:
     - name: install samba
+      tags: samba,ftp
       apt:
         name: samba
         state: latest
