@@ -30,7 +30,7 @@
       when: ansible_distribution == 'Ubuntu'
 
     - name: Install httpd & php for CentOS
-      tags: httpd,centos
+      tags: httpd,centos,apache
       yum:
         name: 
           - httpd
@@ -38,6 +38,22 @@
         state: latest
         update_cache: yes
       when: ansible_distribution == 'CentOS'
+    
+    - name: enable httpd service (CentOS)
+      tags: apache, httpd
+      service:
+        name: httpd
+        enabled: yes
+        state: started
+      when: ansible_distribution == 'CentOS'
+          
+    - name: copy html files to servers
+      tags: apache,httpd
+      copy:
+        src: site.html
+        dest: /var/www/html/index.html
+        owner: root
+        mode: 644
 
 - hosts: db_servers
   become: true
