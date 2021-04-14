@@ -8,13 +8,14 @@
         update_only: yes
         update_cache: yes
       when: ansible_distribution == 'CentOS'  
+      
     - name: install update (Ubuntu)
       tags: always
       apt:
         upgrade: dist
         update_cache: yes
       when: ansible_distribution == 'Ubuntu'
-
+        
 - hosts: web_servers
   gather_facts: false
   become: true
@@ -46,6 +47,22 @@
         enabled: yes
         state: started
       when: ansible_distribution == 'CentOS'
+    
+    - name: change email address for admin
+      tags: apache,httpd,centos
+      lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: '^ServerAdmin'
+        line: ServerAdmin jamilshaikh07@gmail.com
+      when: ansible_distribution == 'CentOS'
+      register: httpd
+    
+    - name: restart httpd (CentOS)
+      tags: apache,httpd,centos
+      service:
+        name: httpd
+        state: restarted
+      when: httpd.changed
           
     - name: copy html files to servers
       tags: apache,httpd
