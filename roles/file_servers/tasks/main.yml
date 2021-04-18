@@ -1,0 +1,6 @@
+- name: install samba
+  tags: samba,ftp
+  apt:
+    name: samba
+    state: latest
+  when: ansible_distribution == 'Ubuntu'

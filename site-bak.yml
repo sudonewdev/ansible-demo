@@ -1,0 +1,112 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+    - name: update repo (CentOS)
+      tags: always
+      yum:
+        update_cache: yes
+      changed_when: false
+      when: ansible_distribution == 'CentOS'  
+      
+    - name: update repo  (Ubuntu)
+      tags: always
+      apt:
+        update_cache: yes
+      changed_when: false
+      when: ansible_distribution == 'Ubuntu'
+
+- hosts: all
+  become: true
+  tasks:
+    - name: add ssh key for simone
+      tags: always
+      authorized_key:
+        user: simone
+        key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBUoFFof1oH8x2Hs7gJ0M16F7Jnev2f4ziEXAsM5O/jW ansible"
+  
+- hosts: web_servers
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Install Apache2 and php packages for Ubuntu
+      tags: apache, ubuntu
+      apt:
+        name: 
+          - apache2
+          - libapache2-mod-php
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Install httpd & php for CentOS
+      tags: httpd,centos,apache
+      yum:
+        name: 
+          - httpd
+          - php
+        state: latest
+        update_cache: yes
+      when: ansible_distribution == 'CentOS'
+    
+    - name: enable httpd service (CentOS)
+      tags: apache, httpd
+      service:
+        name: httpd
+        enabled: yes
+        state: started
+      when: ansible_distribution == 'CentOS'
+    
+    - name: change email address for admin
+      tags: apache,httpd,centos
+      lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: '^ServerAdmin'
+        line: ServerAdmin jamilshaikh07@gmail.com
+      when: ansible_distribution == 'CentOS'
+      register: httpd
+    
+    - name: restart httpd (CentOS)
+      tags: apache,httpd,centos
+      service:
+        name: httpd
+        state: restarted
+      when: httpd.changed
+          
+    - name: copy html files to servers
+      tags: apache,httpd
+      copy:
+        src: site.html
+        dest: /var/www/html/index.html
+        owner: root
+        mode: 644
+
+- hosts: db_servers
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Mariadb install (CentOS)
+      tags: db,centos
+      yum:
+        name:
+          - maridb
+        state: latest
+      when: ansible_distribution == 'CentOS'
+    - name: MariaDB install (Ubuntu)
+      tags: db, ubuntu
+      apt:
+        name: 
+          - mariadb-server
+        state: latest
+      when: ansible_distribution == 'Ubuntu'
+
+- hosts: file_servers
+  gather_facts: false
+  become: yes
+  tasks:
+    - name: install samba
+      tags: samba,ftp
+      apt:
+        name: samba
+        state: latest
+      when: ansible_distribution == 'Ubuntu'

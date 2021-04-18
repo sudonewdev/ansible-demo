@@ -1,0 +1,14 @@
+- name: Mariadb install (CentOS)
+  tags: db,centos
+  yum:
+    name:
+     - maridb
+    state: latest
+  when: ansible_distribution == 'CentOS'
+- name: MariaDB install (Ubuntu)
+  tags: db, ubuntu
+  apt:
+    name: 
+      - mariadb-server
+    state: latest
+  when: ansible_distribution == 'Ubuntu'
